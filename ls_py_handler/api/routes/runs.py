@@ -84,6 +84,8 @@ async def create_runs(
     # Store references in PG
     inserted_ids = []
 
+    runs_to_insert = []
+
     for i, run in enumerate(runs):
         run_dict = run_dicts[i]
 
@@ -102,21 +104,23 @@ async def create_runs(
             else:
                 field_refs[field] = ""
 
-        run_id = await db.fetchval(
-            """
-            INSERT INTO runs (id, trace_id, name, inputs, outputs, metadata)
-            VALUES ($1, $2, $3, $4, $5, $6)
-            RETURNING id
-            """,
-            run.id,
-            run.trace_id,
-            run.name,
-            field_refs["inputs"],
-            field_refs["outputs"],
-            field_refs["metadata"],
-        )
-        inserted_ids.append(str(run_id))
+        runs_to_insert.append((run.id, run.trace_id, run.name, field_refs["inputs"], field_refs["outputs"], field_refs["metadata"]))
 
+    async def insert_runs(runs_to_insert: List[tuple[UUID4, UUID4, str, str, str, str]]) -> List[UUID4]:
+        sql_query = """
+            INSERT INTO runs (id, trace_id, name, inputs, outputs, metadata)
+            (SELECT
+                r.id, r.trace_id, r.name, r.inputs, r.outputs, r.metadata
+            FROM
+                unnest($1::runs[]) AS r
+            )
+            RETURNING id
+            """
+        results = await db.fetch(sql_query, runs_to_insert)
+        inserted_ids = [record['id'] for record in results]
+        return inserted_ids
+
+    inserted_ids = await insert_runs(runs_to_insert)
     return {"status": "created", "run_ids": inserted_ids}
 
 
