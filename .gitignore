@@ -1,0 +1,51 @@
+# Byte-compiled / optimized / internal files
+__pycache__/
+*.pyc
+*.pyd
+*.pyo
+*.egg-info/
+.pytest_cache/
+
+# Distribution / packaging
+dist/
+build/
+*.egg
+
+# Development environments and test coverage
+.tox/
+.coverage
+.cache
+.hypothesis/
+
+# Virtual environments
+.venv/
+venv/
+env/
+/bin/
+
+# IDE and Editor files
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+*.swp
+
+# Operating System files
+.DS_Store
+Thumbs.db
+
+# Notebook files
+.ipynb_checkpoints/
+
+# Miscellaneous
+/htmlcov/
+nosetests.xml
+coverage.xml
+
+# Log files
+*.log
+
+# Program specific files
+/.data/
+/.benchmarks/
